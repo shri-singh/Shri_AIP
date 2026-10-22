@@ -1,0 +1,14 @@
+.env
+.env.*
+!.env.example
+**/__pycache__/
+*.pyc
+.venv/
+.state/
+*.log
+*.dump
+*.parquet
+vendor/
+node_modules/
+dist/
+.DS_Store
