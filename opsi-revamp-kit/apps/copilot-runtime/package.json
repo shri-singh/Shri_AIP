@@ -1,0 +1,24 @@
+{
+  "name": "opsi-copilot-runtime",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Minimal CopilotKit V2 runtime bridge: browser (CopilotKitProvider) -> this runtime -> FastAPI AG-UI agent",
+  "type": "module",
+  "engines": {
+    "node": ">=20.18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "test": "npm run build && node --test \"test/*.test.mjs\"",
+    "check:exports": "node scripts/verify-runtime-exports.mjs"
+  },
+  "dependencies": {
+    "@ag-ui/client": "1.0.2",
+    "@copilotkit/runtime": "1.79.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.15.21",
+    "typescript": "5.8.3"
+  }
+}

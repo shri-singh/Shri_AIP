@@ -1,0 +1,40 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyNonTLS",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": ["arn:aws:s3:::REPLACE_BUCKET", "arn:aws:s3:::REPLACE_BUCKET/*"],
+      "Condition": {"Bool": {"aws:SecureTransport": "false"}}
+    },
+    {
+      "Sid": "DenyPutsWithoutKms",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::REPLACE_BUCKET/*",
+      "Condition": {"StringNotEquals": {"s3:x-amz-server-side-encryption": "aws:kms"}}
+    },
+    {
+      "Sid": "DenyPutsWithOtherKmsKeys",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::REPLACE_BUCKET/*",
+      "Condition": {"StringNotEqualsIfExists": {"s3:x-amz-server-side-encryption-aws-kms-key-id": "arn:aws:kms:REPLACE_REGION:REPLACE_ACCOUNT_ID:key/REPLACE_KMS_KEY_ID"}}
+    },
+    {
+      "Sid": "OptionalOnlyFromVpcEndpoint",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": ["arn:aws:s3:::REPLACE_BUCKET", "arn:aws:s3:::REPLACE_BUCKET/*"],
+      "Condition": {
+        "StringNotEquals": {"aws:SourceVpce": "REPLACE_VPCE_ID"},
+        "ArnNotLike": {"aws:PrincipalArn": ["arn:aws:iam::REPLACE_ACCOUNT_ID:role/REPLACE_BREAK_GLASS_ADMIN_ROLE"]}
+      }
+    }
+  ]
+}

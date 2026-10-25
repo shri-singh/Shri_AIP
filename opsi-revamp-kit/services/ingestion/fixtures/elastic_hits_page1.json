@@ -1,0 +1,33 @@
+{
+  "pit_id": "SYNTHETIC-PIT-1",
+  "took": 3,
+  "timed_out": false,
+  "hits": {
+    "hits": [
+      {
+        "_index": ".ds-logs-checkout-2024.10.24-000001",
+        "_id": "doc-1",
+        "_source": {
+          "@timestamp": "2024-10-24T10:00:05.000Z",
+          "log": {"level": "error"},
+          "service": {"name": "checkout-api"},
+          "host": {"name": "synthetic-host-1"},
+          "message": "Payment declined id=7c9e6679-7425-40de-944b-e07fc1f90ae7 for card 4111 1111 1111 1111",
+          "trace": {"id": "4bf92f3577b34da6a3ce929d0e0e4736"}
+        },
+        "sort": ["2024-10-24T10:00:05.000Z", 11]
+      },
+      {
+        "_index": ".ds-logs-checkout-2024.10.24-000001",
+        "_id": "doc-2",
+        "_source": {
+          "@timestamp": "2024-10-24T10:01:00.000Z",
+          "log": {"level": "info"},
+          "service": {"name": "checkout-api"},
+          "message": "GET /health 200"
+        },
+        "sort": ["2024-10-24T10:01:00.000Z", 12]
+      }
+    ]
+  }
+}

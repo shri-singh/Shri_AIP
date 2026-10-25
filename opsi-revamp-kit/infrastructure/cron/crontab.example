@@ -1,0 +1,9 @@
+# Opsi collectors - install as the opsi-ingest user only AFTER one-shot dry runs succeed:
+#   python -m opsi_ingest collect --source elastic --dry-run
+# Times are host local time; the collector itself works in UTC.
+CRON_TZ=UTC
+*/5 * * * *     /opt/opsi-revamp-kit/infrastructure/cron/opsi-ingest-run.sh collect elastic             # OPSI-INGEST
+*/5 * * * *     /opt/opsi-revamp-kit/infrastructure/cron/opsi-ingest-run.sh collect dynatrace_problems  # OPSI-INGEST
+*/5 * * * *     /opt/opsi-revamp-kit/infrastructure/cron/opsi-ingest-run.sh collect dynatrace_grail     # OPSI-INGEST
+2-59/5 * * * *  /opt/opsi-revamp-kit/infrastructure/cron/opsi-ingest-run.sh index                      # OPSI-INGEST
+15 6 * * *      /opt/opsi-revamp-kit/infrastructure/cron/opsi-ingest-run.sh status || logger -t opsi-alert "ingestion completeness check failed"  # OPSI-INGEST

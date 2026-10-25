@@ -1,0 +1,16 @@
+# Daily completeness check: exits 1 (-> OnFailure notification) on failed windows, ledger gaps
+# or dead-lettered index items in the last 26 hours.
+[Unit]
+Description=Opsi ingestion completeness check
+OnFailure=opsi-notify@%N.service
+
+[Service]
+Type=oneshot
+User=opsi-ingest
+WorkingDirectory=/opt/opsi-revamp-kit/services/ingestion
+EnvironmentFile=/etc/opsi/ingest.env
+Environment=WORKER_STATE_DB=/var/lib/opsi-ingest/state.sqlite3
+ExecStart=/opt/opsi-revamp-kit/.venv/bin/python -m opsi_ingest status --hours 26
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/opsi-ingest

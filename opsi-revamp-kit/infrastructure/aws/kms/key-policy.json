@@ -1,0 +1,26 @@
+{
+  "Version": "2012-10-17",
+  "Id": "opsi-archive-key",
+  "Statement": [
+    {
+      "Sid": "KeyAdministration",
+      "Effect": "Allow",
+      "Principal": {"AWS": "arn:aws:iam::REPLACE_ACCOUNT_ID:role/REPLACE_KMS_ADMIN_ROLE"},
+      "Action": ["kms:Create*", "kms:Describe*", "kms:Enable*", "kms:List*", "kms:Put*", "kms:Update*",
+                 "kms:Revoke*", "kms:Disable*", "kms:Get*", "kms:Delete*", "kms:TagResource", "kms:UntagResource",
+                 "kms:ScheduleKeyDeletion", "kms:CancelKeyDeletion"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "UseViaS3ForOpsiRoles",
+      "Effect": "Allow",
+      "Principal": {"AWS": [
+        "arn:aws:iam::REPLACE_ACCOUNT_ID:role/REPLACE_COLLECTOR_ROLE",
+        "arn:aws:iam::REPLACE_ACCOUNT_ID:role/REPLACE_API_ROLE"
+      ]},
+      "Action": ["kms:GenerateDataKey", "kms:Decrypt"],
+      "Resource": "*",
+      "Condition": {"StringEquals": {"kms:ViaService": "s3.REPLACE_REGION.amazonaws.com", "kms:CallerAccount": "REPLACE_ACCOUNT_ID"}}
+    }
+  ]
+}

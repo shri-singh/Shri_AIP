@@ -1,0 +1,22 @@
+{
+  "totalCount": 3,
+  "pageSize": 2,
+  "problems": [
+    {
+      "problemId": "-3333333333333333333_1729764120000V2",
+      "displayId": "P-24103",
+      "title": "Host CPU saturation",
+      "impactLevel": "INFRASTRUCTURE",
+      "severityLevel": "RESOURCE_CONTENTION",
+      "status": "OPEN",
+      "affectedEntities": [{"entityId": {"id": "HOST-00000000000000C3", "type": "HOST"}, "name": "ip-10-0-0-1"}],
+      "impactedEntities": [],
+      "rootCauseEntity": null,
+      "managementZones": [],
+      "entityTags": [],
+      "problemFilters": [],
+      "startTime": 1729764120000,
+      "endTime": -1
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# sudo cp infrastructure/cron/logrotate.opsi-ingest /etc/logrotate.d/opsi-ingest && sudo logrotate -d /etc/logrotate.d/opsi-ingest
+/var/log/opsi-ingest/*.log {
+    daily
+    rotate 14
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+    su opsi-ingest opsi-ingest
+}

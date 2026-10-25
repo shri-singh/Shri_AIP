@@ -1,0 +1,20 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "InvokeApprovedModelsOnly",
+      "Effect": "Allow",
+      "Action": ["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+      "Resource": [
+        "arn:aws:bedrock:REPLACE_REGION:REPLACE_ACCOUNT_ID:inference-profile/REPLACE_APPROVED_INFERENCE_PROFILE_ID",
+        "arn:aws:bedrock:*::foundation-model/REPLACE_APPROVED_MODEL_ID"
+      ]
+    },
+    {
+      "Sid": "OptionalEmbeddingsModel",
+      "Effect": "Allow",
+      "Action": ["bedrock:InvokeModel"],
+      "Resource": "arn:aws:bedrock:REPLACE_REGION::foundation-model/REPLACE_APPROVED_EMBEDDING_MODEL_ID"
+    }
+  ]
+}

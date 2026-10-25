@@ -1,0 +1,18 @@
+# OPTIONAL alternative to scripts/repo/vendor_component.py: Carvel vendir (Apache-2.0) syncs selected paths
+# from pinned git refs and writes a lock file. Field names below follow vendir's documented config format as
+# understood on 2026-10-24 - VERIFY against https://carvel.dev/vendir/docs/latest/vendir-spec/ before use.
+# If you use vendir, still keep third_party/VENDORED.json (or generate it from vendir.lock.yml) so that
+# repo_hygiene.py, licence notices and the CODEOWNERS review keep working. Do not run both tools on one path.
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+directories:
+  - path: third_party/openmetadata
+    contents:
+      - path: schema
+        git:
+          url: https://git.corp.example/upstream-mirrors/OpenMetadata.git
+          ref: 2.0.6-release
+        includePaths:
+          - openmetadata-spec/src/main/resources/json/schema/entity/services/connections/**/*
+          - openmetadata-spec/src/main/resources/json/schema/type/**/*
+        newRootPath: openmetadata-spec/src/main/resources/json/schema

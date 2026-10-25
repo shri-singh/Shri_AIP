@@ -1,0 +1,51 @@
+# Restricted LAB override for OpenMetadata's checked-in development compose
+#   vendor/OpenMetadata/docker/development/docker-compose-postgres.yml   (verified at tag 2.0.6-release)
+#
+# Why an override is needed - the upstream DEV file:
+#   - publishes 5432 (PostgreSQL), 9200/9300 (OpenSearch, security plugin DISABLED), 8585/8586,
+#     5005 (JVM remote debugger = remote code execution if reachable) and 8080 (Airflow) on ALL interfaces;
+#   - ships fixed passwords and a fixed FERNET_KEY;
+#   - builds images from source (heavy Maven/Node build).
+#
+# IMPORTANT Compose merge rule: `ports:` lists from override files are APPENDED, not replaced.
+# This file therefore uses the `!reset` / `!override` YAML tags (Docker Compose >= 2.24).
+# Always verify the merged result:  scripts/compose_safe.sh openmetadata-lab config
+# and let scripts/check_port_exposure.py fail closed if anything binds 0.0.0.0.
+#
+# Even with this override the stack is LAB-ONLY: OpenSearch security stays disabled inside the
+# docker network and credentials are lab values from the env file.
+# For anything shared, use openmetadata.prod-reviewed.example.yml (release images, external DB/search).
+
+services:
+  postgresql:
+    ports: !reset []
+    environment:
+      POSTGRES_PASSWORD: ${OM_LAB_POSTGRES_PASSWORD:?set OM_LAB_POSTGRES_PASSWORD in the env file}
+    mem_limit: 2g
+
+  opensearch:
+    ports: !reset []
+    mem_limit: 3g
+
+  execute-migrate-all:
+    ports: !reset []
+    environment:
+      DB_USER_PASSWORD: ${OM_LAB_DB_PASSWORD:?set OM_LAB_DB_PASSWORD}
+      FERNET_KEY: ${OM_LAB_FERNET_KEY:?set OM_LAB_FERNET_KEY}
+
+  openmetadata-server:
+    ports: !override
+      - "127.0.0.1:8585:8585"
+      - "127.0.0.1:8586:8586"
+    environment:
+      DB_USER_PASSWORD: ${OM_LAB_DB_PASSWORD:?set OM_LAB_DB_PASSWORD}
+      FERNET_KEY: ${OM_LAB_FERNET_KEY:?set OM_LAB_FERNET_KEY}
+    mem_limit: 4g
+
+  ingestion:
+    ports: !reset []
+    environment:
+      AIRFLOW_PASSWORD: ${OM_LAB_AIRFLOW_PASSWORD:?set OM_LAB_AIRFLOW_PASSWORD}
+      DB_USER_PASSWORD: ${OM_LAB_DB_PASSWORD:?set OM_LAB_DB_PASSWORD}
+      FERNET_KEY: ${OM_LAB_FERNET_KEY:?set OM_LAB_FERNET_KEY}
+    mem_limit: 3g

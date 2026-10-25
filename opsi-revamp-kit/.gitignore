@@ -1,0 +1,28 @@
+# secrets / local config
+.env
+.env.*
+!.env.example
+*.env
+!*.env.example
+.openmetadata-lab.env
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+# node
+node_modules/
+dist/
+*.tsbuildinfo
+# state, data, outputs
+.state/
+*.sqlite3
+*.parquet
+*.dump
+reports/
+inventory/
+vendor/
+local-archive/
+*.log

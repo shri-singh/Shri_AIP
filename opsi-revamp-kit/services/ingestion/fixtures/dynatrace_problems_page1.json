@@ -1,0 +1,39 @@
+{
+  "totalCount": 3,
+  "pageSize": 2,
+  "nextPageKey": "SYNTHETIC-PAGE-KEY-2",
+  "problems": [
+    {
+      "problemId": "-1111111111111111111_1729764000000V2",
+      "displayId": "P-24101",
+      "title": "Response time degradation",
+      "impactLevel": "SERVICES",
+      "severityLevel": "PERFORMANCE",
+      "status": "OPEN",
+      "affectedEntities": [{"entityId": {"id": "SERVICE-00000000000000A1", "type": "SERVICE"}, "name": "checkout-api"}],
+      "impactedEntities": [{"entityId": {"id": "SERVICE-00000000000000A1", "type": "SERVICE"}, "name": "checkout-api"}],
+      "rootCauseEntity": {"entityId": {"id": "SERVICE-00000000000000A1", "type": "SERVICE"}, "name": "checkout-api"},
+      "managementZones": [{"id": "1", "name": "synthetic-zone"}],
+      "entityTags": [],
+      "problemFilters": [],
+      "startTime": 1729764000000,
+      "endTime": -1
+    },
+    {
+      "problemId": "-2222222222222222222_1729764060000V2",
+      "displayId": "P-24102",
+      "title": "Failure rate increase for password=hunter2 test",
+      "impactLevel": "APPLICATION",
+      "severityLevel": "ERROR",
+      "status": "CLOSED",
+      "affectedEntities": [{"entityId": {"id": "SERVICE-00000000000000B2", "type": "SERVICE"}, "name": "payments"}],
+      "impactedEntities": [],
+      "rootCauseEntity": null,
+      "managementZones": [],
+      "entityTags": [],
+      "problemFilters": [],
+      "startTime": 1729764060000,
+      "endTime": 1729764600000
+    }
+  ]
+}

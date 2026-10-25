@@ -1,0 +1,96 @@
+# OpenTelemetry Collector (contrib) - production-shaped config for the Opsi host.
+# Receivers listen inside the container; compose publishes them on 127.0.0.1 only.
+# Exports OTLP/HTTP to the approved backend:
+#   Dynatrace : OTLP_EXPORT_ENDPOINT=https://<env-id>.live.dynatrace.com/api/v2/otlp
+#               OTLP_EXPORT_AUTH_HEADER="Api-Token <token with openTelemetryTrace.ingest, metrics.ingest, logs.ingest>"
+#               (Dynatrace expects DELTA metrics: the cumulativetodelta processor below handles that)
+#   Elastic   : OTLP_EXPORT_ENDPOINT=https://<apm-server-or-managed-otlp-endpoint>
+#               OTLP_EXPORT_AUTH_HEADER="ApiKey <key>"   (or "Bearer <secret token>")
+# Validate before deploying:  docker run --rm -v $PWD/config.prod.yaml:/c.yaml \
+#     otel/opentelemetry-collector-contrib:0.137.0 validate --config=/c.yaml
+# Content policy (ADR-0011): prompts, completions, message bodies, SQL text, query strings and
+# auth headers are removed here even if an SDK/instrumentation emits them by mistake.
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 20
+
+  attributes/drop_sensitive:
+    actions:
+      - {key: http.request.header.authorization, action: delete}
+      - {key: http.request.header.cookie, action: delete}
+      - {key: http.response.header.set-cookie, action: delete}
+      - {key: url.query, action: delete}
+      - {key: db.statement, action: delete}
+      - {key: db.query.text, action: delete}
+      - {key: messaging.message.body, action: delete}
+      - {pattern: "^gen_ai\\.(prompt|completion|input\\.messages|output\\.messages|system_instructions|tool\\.call\\.arguments|tool\\.call\\.result).*", action: delete}
+      - {pattern: "^(llm|traceloop\\.entity)\\.(prompts|completions|input|output).*", action: delete}
+      - {key: enduser.id, action: hash}
+      - {key: user.email, action: delete}
+
+  redaction:
+    allow_all_keys: true
+    blocked_values:
+      - "(?i)bearer\\s+[a-z0-9._~+/=-]{8,}"
+      - "(?i)api-token\\s+[a-z0-9._-]{8,}"
+      - "\\b(?:AKIA|ASIA)[0-9A-Z]{16}\\b"
+      - "\\beyJ[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\b"
+      - "\\bdt0[a-z]\\d{2}\\.[A-Za-z0-9]{12,}"
+      - "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+    summary: info
+
+  resource:
+    attributes:
+      - {key: deployment.environment.name, value: "${env:DEPLOYMENT_ENVIRONMENT}", action: upsert}
+
+  cumulativetodelta: {}
+
+  batch:
+    timeout: 5s
+    send_batch_size: 512
+
+exporters:
+  otlphttp:
+    endpoint: ${env:OTLP_EXPORT_ENDPOINT}
+    headers:
+      Authorization: ${env:OTLP_EXPORT_AUTH_HEADER}
+    compression: gzip
+    retry_on_failure:
+      enabled: true
+    sending_queue:
+      enabled: true
+      queue_size: 2000
+
+service:
+  extensions: [health_check]
+  telemetry:
+    logs:
+      level: info
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/drop_sensitive, redaction, resource, batch]
+      exporters: [otlphttp]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, cumulativetodelta, batch]
+      exporters: [otlphttp]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/drop_sensitive, redaction, resource, batch]
+      exporters: [otlphttp]

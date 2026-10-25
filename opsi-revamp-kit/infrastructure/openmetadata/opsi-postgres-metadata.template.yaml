@@ -1,0 +1,45 @@
+# OpenMetadata metadata-only ingestion of the Opsi application PostgreSQL database.
+# Field names verified against docs.open-metadata.org v2.0.x connectors/database/postgres/yaml (2026-10).
+# Dollar-brace placeholders are rendered by run_metadata_ingest.sh (Python string.Template) into a 0600 temp file -
+# OpenMetadata's own env-var expansion is not relied upon.
+#
+# Read-only, metadata-only on purpose: no profiler, no sample data, no query usage/lineage (those need
+# SELECT / pg_read_all_stats on a multi-TB production database - DBA decision, not a default).
+source:
+  type: postgres
+  serviceName: ${OM_SERVICE_NAME}
+  serviceConnection:
+    config:
+      type: PostgreSQL
+      username: ${OM_PG_USER}
+      authType:
+        password: ${OM_PG_PASSWORD}
+      hostPort: ${OM_PG_HOSTPORT}
+      database: ${OM_PG_DATABASE}
+      ingestAllDatabases: false
+      sslMode: ${OM_PG_SSLMODE}
+  sourceConfig:
+    config:
+      type: DatabaseMetadata
+      markDeletedTables: true
+      markDeletedSchemas: true
+      includeTables: true
+      includeViews: true
+      includeTags: false
+      includeOwners: false
+      includeStoredProcedures: false
+      includeDDL: false
+      schemaFilterPattern:
+        includes: ${OM_SCHEMA_INCLUDES_JSON}
+sink:
+  type: metadata-rest
+  config: {}
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: ${OM_API_URL}
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: ${OM_INGESTION_BOT_JWT}
+    storeServiceConnection: false
+    verifySSL: ${OM_VERIFY_SSL}

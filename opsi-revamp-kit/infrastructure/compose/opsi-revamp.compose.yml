@@ -1,0 +1,52 @@
+# Revamp side-car services on the Opsi EC2 host (the existing Opsi app is NOT managed here).
+#   copilot-runtime : CopilotKit V2 Node runtime bridge (127.0.0.1:4000; NGINX proxies /api/copilotkit)
+#   otel-collector  : OTLP receiver on 127.0.0.1:4317/4318, exports to the approved backend
+#
+#   scripts/compose_safe.sh opsi-revamp config      # validates + checks port exposure
+#   scripts/compose_safe.sh opsi-revamp up
+#
+# The runtime uses host networking so it reaches FastAPI on 127.0.0.1:8000 without publishing
+# anything. If host networking is not allowed by your Docker policy, run it with systemd
+# instead (infrastructure/systemd/opsi-copilot-runtime.service).
+
+services:
+  copilot-runtime:
+    build:
+      context: ../../apps/copilot-runtime
+    image: opsi/copilot-runtime:${OPSI_REVAMP_VERSION:-dev}
+    network_mode: host
+    environment:
+      RUNTIME_HOST: 127.0.0.1
+      RUNTIME_PORT: "4000"
+      OPSI_AGENT_BASE_URL: ${OPSI_AGENT_BASE_URL:-http://127.0.0.1:8000/api/v2/agents}
+      OPSI_COPILOT_AGENT_IDS: ${OPSI_COPILOT_AGENT_IDS:-opsi-investigator}
+      RUNTIME_FORWARD_HEADERS: ${RUNTIME_FORWARD_HEADERS:-authorization,x-request-id,traceparent,tracestate}
+      COPILOTKIT_TELEMETRY_DISABLED: "true"
+      DO_NOT_TRACK: "1"
+    read_only: true
+    tmpfs: ["/tmp"]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    mem_limit: 512m
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options: {max-size: "20m", max-file: "5"}
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:${OTEL_COLLECTOR_VERSION:-0.137.0}
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ../../services/otel-collector/${OTEL_CONFIG_FILE:-config.prod.yaml}:/etc/otelcol-contrib/config.yaml:ro
+    environment:
+      OTLP_EXPORT_ENDPOINT: ${OTLP_EXPORT_ENDPOINT:-}
+      OTLP_EXPORT_AUTH_HEADER: ${OTLP_EXPORT_AUTH_HEADER:-}
+      DEPLOYMENT_ENVIRONMENT: ${DEPLOYMENT_ENVIRONMENT:-lab}
+    ports:
+      - "127.0.0.1:4317:4317"
+      - "127.0.0.1:4318:4318"
+      - "127.0.0.1:13133:13133"
+    read_only: true
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 512m
+    restart: unless-stopped

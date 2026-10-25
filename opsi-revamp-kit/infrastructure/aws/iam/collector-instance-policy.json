@@ -1,0 +1,40 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "WriteBronzeAndQuarantine",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject"],
+      "Resource": [
+        "arn:aws:s3:::REPLACE_ARCHIVE_BUCKET/raw/*",
+        "arn:aws:s3:::REPLACE_ARCHIVE_BUCKET/quarantine/*"
+      ]
+    },
+    {
+      "Sid": "OptionalCleanupOfUncommittedParts",
+      "Effect": "Allow",
+      "Action": ["s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::REPLACE_ARCHIVE_BUCKET/raw/*/run=*"
+    },
+    {
+      "Sid": "ListOwnPrefixes",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::REPLACE_ARCHIVE_BUCKET",
+      "Condition": {"StringLike": {"s3:prefix": ["raw/*", "quarantine/*"]}}
+    },
+    {
+      "Sid": "UseArchiveKmsKey",
+      "Effect": "Allow",
+      "Action": ["kms:GenerateDataKey", "kms:Decrypt"],
+      "Resource": "arn:aws:kms:REPLACE_REGION:REPLACE_ACCOUNT_ID:key/REPLACE_KMS_KEY_ID",
+      "Condition": {"StringEquals": {"kms:ViaService": "s3.REPLACE_REGION.amazonaws.com"}}
+    },
+    {
+      "Sid": "ReadOwnSecrets",
+      "Effect": "Allow",
+      "Action": "secretsmanager:GetSecretValue",
+      "Resource": "arn:aws:secretsmanager:REPLACE_REGION:REPLACE_ACCOUNT_ID:secret:opsi/ingest/*"
+    }
+  ]
+}

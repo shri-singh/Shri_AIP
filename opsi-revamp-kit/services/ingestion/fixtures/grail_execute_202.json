@@ -1,0 +1,6 @@
+{
+  "state": "RUNNING",
+  "requestToken": "SYNTHETIC-REQUEST-TOKEN",
+  "ttlSeconds": 60,
+  "progress": 10
+}

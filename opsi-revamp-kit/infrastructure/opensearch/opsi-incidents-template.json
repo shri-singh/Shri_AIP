@@ -1,0 +1,32 @@
+{
+  "index_patterns": ["opsi-incidents*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1,
+      "refresh_interval": "30s"
+    },
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "tenant_id":    {"type": "keyword"},
+        "kind":         {"type": "keyword"},
+        "source":       {"type": "keyword"},
+        "problem_id":   {"type": "keyword"},
+        "service_id":   {"type": "keyword"},
+        "fingerprint":  {"type": "keyword"},
+        "status":       {"type": "keyword"},
+        "severity":     {"type": "keyword"},
+        "count":        {"type": "integer"},
+        "event_time":   {"type": "date"},
+        "last_seen":    {"type": "date"},
+        "entity_ids":   {"type": "keyword"},
+        "title":        {"type": "text", "fields": {"raw": {"type": "keyword", "ignore_above": 256}}},
+        "message":      {"type": "text"},
+        "evidence_ref": {"type": "keyword", "index": false}
+      }
+    }
+  },
+  "priority": 200,
+  "_meta": {"owner": "opsi", "description": "Curated Opsi incidents/error signatures (never raw logs, never OpenMetadata catalog docs)"}
+}

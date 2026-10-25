@@ -1,0 +1,38 @@
+# Scheduled private-mirror sync. Lives in a small ADMIN repo (e.g. ORG/upstream-mirrors-admin), NOT in the product repo.
+# Copy the kit's scripts/repo/mirror_upstream.sh into that admin repo as scripts/mirror_upstream.sh.
+# Runs on a runner with egress to github.com; pushes with a service-account credential configured in the
+# runner's git credential helper (or a fine-grained token in MIRROR_PUSH_TOKEN wired into a helper below) -
+# never in the URL. The mirror repos are protected so only this service account can push.
+name: mirror-upstreams
+on:
+  schedule:
+    - cron: "17 3 * * 1"        # weekly, Monday 03:17 UTC
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mirror:
+    runs-on: [self-hosted, linux, egress-github]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - upstream: https://github.com/open-metadata/OpenMetadata.git
+            mirror: https://git.corp.example/upstream-mirrors/OpenMetadata.git
+            branches: "main 1.*-release 2.*-release"
+          - upstream: https://github.com/CopilotKit/CopilotKit.git
+            mirror: https://git.corp.example/upstream-mirrors/CopilotKit.git
+            branches: "main"
+    steps:
+      - uses: actions/checkout@v4
+      - name: configure credential helper for the mirror host (token never appears in a URL or log)
+        env:
+          MIRROR_PUSH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+        run: |
+          git config --global credential.https://git.corp.example.helper \
+            '!f() { test "$1" = get && echo username=x-access-token && echo "password=${MIRROR_PUSH_TOKEN}"; }; f'
+      - name: mirror branches + tags
+        env:
+          MIRROR_BRANCHES: ${{ matrix.branches }}
+          MIRROR_PUSH_TOKEN: ${{ secrets.MIRROR_PUSH_TOKEN }}
+        run: scripts/mirror_upstream.sh "${{ matrix.upstream }}" "${{ matrix.mirror }}" "$RUNNER_TEMP/mirror-cache"

@@ -1,0 +1,37 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ChatAttachmentsPresignAndScanStatus",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:GetObjectTagging"],
+      "Resource": "arn:aws:s3:::REPLACE_ATTACHMENTS_BUCKET/chat-attachments/*"
+    },
+    {
+      "Sid": "VoiceTemporaryObjects",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::REPLACE_ATTACHMENTS_BUCKET/voice-tmp/*"
+    },
+    {
+      "Sid": "UseAttachmentKmsKey",
+      "Effect": "Allow",
+      "Action": ["kms:GenerateDataKey", "kms:Decrypt"],
+      "Resource": "arn:aws:kms:REPLACE_REGION:REPLACE_ACCOUNT_ID:key/REPLACE_KMS_KEY_ID",
+      "Condition": {"StringEquals": {"kms:ViaService": "s3.REPLACE_REGION.amazonaws.com"}}
+    },
+    {
+      "Sid": "VoiceOptionalTranscribePolly",
+      "Effect": "Allow",
+      "Action": ["transcribe:StartTranscriptionJob", "transcribe:GetTranscriptionJob",
+                 "transcribe:DeleteTranscriptionJob", "polly:SynthesizeSpeech"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReadOwnSecrets",
+      "Effect": "Allow",
+      "Action": "secretsmanager:GetSecretValue",
+      "Resource": "arn:aws:secretsmanager:REPLACE_REGION:REPLACE_ACCOUNT_ID:secret:opsi/api/*"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+# LAB ONLY: prints span summaries to the collector's own log (debug exporter, basic verbosity).
+# Never use in production: the debug exporter keeps telemetry in container logs.
+# Same redaction as prod so lab behaviour matches.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 256
+  attributes/drop_sensitive:
+    actions:
+      - {key: http.request.header.authorization, action: delete}
+      - {key: url.query, action: delete}
+      - {key: db.query.text, action: delete}
+      - {pattern: "^gen_ai\\.(prompt|completion|input\\.messages|output\\.messages).*", action: delete}
+  batch: {}
+
+exporters:
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/drop_sensitive, batch]
+      exporters: [debug]

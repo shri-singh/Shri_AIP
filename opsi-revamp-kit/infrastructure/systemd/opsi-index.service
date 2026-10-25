@@ -1,0 +1,24 @@
+# Index stage: applies committed bronze windows (outbox) to PostgreSQL / OpenSearch.
+# Runs independently of the collectors: a database outage never blocks bronze collection.
+[Unit]
+Description=Opsi curated index stage
+After=network-online.target
+Wants=network-online.target
+OnFailure=opsi-notify@%N.service
+
+[Service]
+Type=oneshot
+User=opsi-ingest
+Group=opsi-ingest
+WorkingDirectory=/opt/opsi-revamp-kit/services/ingestion
+EnvironmentFile=/etc/opsi/ingest.env
+Environment=PYTHONUNBUFFERED=1 WORKER_STATE_DB=/var/lib/opsi-ingest/state.sqlite3
+ExecStart=/opt/opsi-revamp-kit/.venv/bin/python -m opsi_ingest index --limit 100
+TimeoutStartSec=20min
+MemoryMax=2G
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/opsi-ingest
+CapabilityBoundingSet=

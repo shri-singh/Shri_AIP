@@ -1,0 +1,11 @@
+# Collectors (services/ingestion). Python >= 3.11 (pyarrow 26 requires it).
+# Versions = exactly what the kit's tests passed with on 2026-10-24. Upgrade deliberately, then re-run tests.
+python-dotenv==1.2.4
+requests==2.34.2
+boto3==1.43.118
+pyarrow==26.0.0
+# Elasticsearch client MAJOR must match your CLUSTER major: 9.x clients do NOT work with 8.x clusters.
+#   8.x cluster -> elasticsearch>=8.15,<9    9.x cluster -> elasticsearch>=9,<10
+elasticsearch==8.19.3
+# PostgreSQL (state backend 'postgres' and curated index stage). LGPL-3.0 - dynamically linked library use.
+psycopg[binary]==3.3.6

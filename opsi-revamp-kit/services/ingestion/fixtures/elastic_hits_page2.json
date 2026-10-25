@@ -1,0 +1,20 @@
+{
+  "pit_id": "SYNTHETIC-PIT-2",
+  "took": 2,
+  "timed_out": false,
+  "hits": {
+    "hits": [
+      {
+        "_index": ".ds-logs-checkout-2024.10.24-000001",
+        "_id": "doc-3",
+        "_source": {
+          "@timestamp": "2024-10-24T10:04:59.999Z",
+          "log": {"level": "ERROR"},
+          "service": {"name": "checkout-api"},
+          "message": "Connection to db.internal:5432 refused (pool exhausted)"
+        },
+        "sort": ["2024-10-24T10:04:59.999Z", 13]
+      }
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "_comment": "Copy to ~/workspaces/workspace.json, replace git.corp.example/ORG and the mirror org, then: python3 scripts/repo/workspace.py init --manifest ~/workspaces/workspace.json. Roles and layout: docs/repository-strategy.md section 6. No credentials in URLs (refused).",
+  "root": "~/workspaces",
+  "repos": [
+    {
+      "name": "opsi-baseline-snapshot",
+      "dir": "opsi-baseline-snapshot",
+      "url": "https://git.corp.example/ORG/opsi.git",
+      "role": "readonly"
+    },
+    {
+      "name": "opsi-enterprise-revamp",
+      "dir": "opsi-enterprise-revamp",
+      "url": "https://git.corp.example/ORG/opsi-enterprise-revamp.git",
+      "role": "product",
+      "extra_remotes": [
+        { "name": "legacy-opsi", "url": "https://git.corp.example/ORG/opsi.git", "push": false }
+      ]
+    },
+    {
+      "name": "openmetadata",
+      "dir": "upstream/OpenMetadata",
+      "url": "https://git.corp.example/upstream-mirrors/OpenMetadata.git",
+      "role": "upstream",
+      "ref": "2.0.6-release",
+      "partial": true
+    },
+    {
+      "name": "copilotkit",
+      "dir": "upstream/CopilotKit",
+      "url": "https://git.corp.example/upstream-mirrors/CopilotKit.git",
+      "role": "upstream",
+      "ref": "v1.79.1",
+      "partial": true
+    },
+    {
+      "name": "opsi-revamp-kit",
+      "dir": "reference/opsi-revamp-kit",
+      "url": "https://git.corp.example/ORG/opsi-revamp-kit.git",
+      "role": "reference"
+    }
+  ]
+}

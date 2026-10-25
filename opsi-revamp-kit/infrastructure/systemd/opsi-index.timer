@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the Opsi index stage every 5 minutes (offset from collectors)
+
+[Timer]
+OnCalendar=*:2/5
+RandomizedDelaySec=20
+Persistent=true
+
+[Install]
+WantedBy=timers.target

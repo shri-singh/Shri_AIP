@@ -1,0 +1,11 @@
+# Failure hook used by OnFailure=. Writes a structured journal line (ship journald to CloudWatch /
+# your SIEM and alert on SYSLOG_IDENTIFIER=opsi-alert). Optionally publish to SNS: uncomment and set
+# OPSI_ALERT_TOPIC_ARN in /etc/opsi/notify.env (instance role needs sns:Publish on that topic only).
+[Unit]
+Description=Opsi failure notification for %i
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/opsi/notify.env
+ExecStart=/usr/bin/logger -t opsi-alert "unit %i failed on %H - check: journalctl -u %i -n 100"
+# ExecStart=/usr/bin/aws sns publish --topic-arn ${OPSI_ALERT_TOPIC_ARN} --subject "Opsi unit failed" --message "%i failed on %H"

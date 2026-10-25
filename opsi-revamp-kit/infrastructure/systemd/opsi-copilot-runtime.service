@@ -1,0 +1,27 @@
+# CopilotKit V2 runtime bridge as a native service (alternative to the compose stack).
+# Build first: cd /opt/opsi-revamp-kit/apps/copilot-runtime && npm ci && npm run build
+[Unit]
+Description=Opsi CopilotKit V2 runtime bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=opsi-runtime
+Group=opsi-runtime
+WorkingDirectory=/opt/opsi-revamp-kit/apps/copilot-runtime
+EnvironmentFile=/etc/opsi/copilot-runtime.env
+Environment=NODE_ENV=production COPILOTKIT_TELEMETRY_DISABLED=true DO_NOT_TRACK=1 RUNTIME_HOST=127.0.0.1 RUNTIME_PORT=4000
+ExecStart=/usr/bin/node dist/main.js
+Restart=on-failure
+RestartSec=5
+MemoryMax=768M
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

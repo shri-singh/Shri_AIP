@@ -1,0 +1,85 @@
+# OpenMetadata deployment TEMPLATE for a shared/non-lab environment - REVIEW BEFORE USE.
+#
+# Differences from the upstream dev compose:
+#   - release images pinned by version (also pin digests: `docker buildx imagetools inspect <image>`)
+#   - NO bundled PostgreSQL / OpenSearch: use a dedicated RDS/Aurora PostgreSQL >= 15 DATABASE
+#     (never the Opsi app database or the multi-TB log database) and a dedicated OpenSearch 3.x /
+#     Elasticsearch 9.x domain with security enabled (OpenMetadata 2.0 minimums per its docs, 2026-10)
+#   - secrets only via an env file rendered from Secrets Manager, no defaults
+#   - server bound to 127.0.0.1; TLS + SSO terminated by the corporate reverse proxy
+#   - migrations run as an explicit, separate step (2.0 has no automated downgrade: snapshot first)
+#   - no Airflow: metadata ingestion runs via the `metadata` CLI on a schedule
+#     (infrastructure/openmetadata/README.md) - mind the Collate Community License on that package
+#
+# Variable names follow OpenMetadata's compose/env conventions at 2.0.6 - verify them against
+# conf/openmetadata.yaml of the exact release you deploy before first start.
+#
+#   docker compose -p opsi-openmetadata --env-file /etc/opsi/openmetadata.env -f this.yml config
+#   docker compose -p opsi-openmetadata --env-file /etc/opsi/openmetadata.env -f this.yml --profile migrate run --rm migrate
+#   docker compose -p opsi-openmetadata --env-file /etc/opsi/openmetadata.env -f this.yml up -d openmetadata-server
+
+x-om-env: &om-env
+  OPENMETADATA_CLUSTER_NAME: ${OM_CLUSTER_NAME:-opsi-openmetadata}
+  SERVER_HOST_API_URL: ${OM_SERVER_HOST_API_URL:?e.g. https://openmetadata.corp.example/api}
+  LOG_LEVEL: ${OM_LOG_LEVEL:-INFO}
+  DB_DRIVER_CLASS: org.postgresql.Driver
+  DB_SCHEME: postgresql
+  DB_HOST: ${OM_DB_HOST:?}
+  DB_PORT: ${OM_DB_PORT:-5432}
+  DB_USER: ${OM_DB_USER:?}
+  DB_USER_PASSWORD: ${OM_DB_PASSWORD:?}
+  OM_DATABASE: ${OM_DB_NAME:-openmetadata_db}
+  DB_PARAMS: ${OM_DB_PARAMS:-sslmode=require}
+  SEARCH_TYPE: ${OM_SEARCH_TYPE:-opensearch}
+  ELASTICSEARCH_HOST: ${OM_SEARCH_HOST:?}
+  ELASTICSEARCH_PORT: ${OM_SEARCH_PORT:-443}
+  ELASTICSEARCH_SCHEME: https
+  ELASTICSEARCH_USER: ${OM_SEARCH_USER:?}
+  ELASTICSEARCH_PASSWORD: ${OM_SEARCH_PASSWORD:?}
+  ELASTICSEARCH_TRUST_STORE_PATH: ${OM_SEARCH_TRUSTSTORE_PATH:-}
+  ELASTICSEARCH_TRUST_STORE_PASSWORD: ${OM_SEARCH_TRUSTSTORE_PASSWORD:-}
+  AUTHENTICATION_PROVIDER: ${OM_AUTH_PROVIDER:-custom-oidc}
+  CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME: ${OM_OIDC_PROVIDER_NAME:-corporate-sso}
+  AUTHENTICATION_PUBLIC_KEYS: ${OM_AUTH_PUBLIC_KEYS:?JSON list incl. the IdP JWKS URL and OpenMetadata's own jwks endpoint}
+  AUTHENTICATION_AUTHORITY: ${OM_AUTH_AUTHORITY:?}
+  AUTHENTICATION_CLIENT_ID: ${OM_AUTH_CLIENT_ID:?}
+  AUTHENTICATION_CALLBACK_URL: ${OM_AUTH_CALLBACK_URL:?}
+  AUTHORIZER_ADMIN_PRINCIPALS: ${OM_ADMIN_PRINCIPALS:?e.g. [alice,bob]}
+  AUTHORIZER_PRINCIPAL_DOMAIN: ${OM_PRINCIPAL_DOMAIN:?e.g. corp.example}
+  FERNET_KEY: ${OM_FERNET_KEY:?}
+  JWT_ISSUER: ${OM_JWT_ISSUER:-openmetadata.corp.example}
+  JWT_KEY_ID: ${OM_JWT_KEY_ID:?generate a new UUID; never reuse the upstream dev value}
+  RSA_PUBLIC_KEY_FILE_PATH: /etc/openmetadata/jwt/public_key.der
+  RSA_PRIVATE_KEY_FILE_PATH: /etc/openmetadata/jwt/private_key.der
+  PIPELINE_SERVICE_CLIENT_ENABLED: "false"
+
+services:
+  migrate:
+    image: docker.getcollate.io/openmetadata/server:${OM_VERSION:-2.0.6}
+    command: ["./bootstrap/openmetadata-ops.sh", "migrate"]
+    environment: *om-env
+    volumes:
+      - /etc/opsi/openmetadata/jwt:/etc/openmetadata/jwt:ro
+    profiles: ["migrate"]
+    restart: "no"
+
+  openmetadata-server:
+    image: docker.getcollate.io/openmetadata/server:${OM_VERSION:-2.0.6}
+    environment: *om-env
+    volumes:
+      - /etc/opsi/openmetadata/jwt:/etc/openmetadata/jwt:ro
+    ports:
+      - "127.0.0.1:8585:8585"
+      - "127.0.0.1:8586:8586"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8586/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+    mem_limit: ${OM_MEM_LIMIT:-6g}
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    logging:
+      driver: json-file
+      options: {max-size: "50m", max-file: "5"}

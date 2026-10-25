@@ -1,0 +1,14 @@
+{
+  "name": "opsi-migration-validator",
+  "private": true,
+  "type": "module",
+  "description": "Validates database/migrations against PGlite (PostgreSQL in WASM) - no server needed",
+  "scripts": {
+    "validate": "node validate_migrations.mjs"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.11",
+    "@electric-sql/pglite-pgvector": "0.0.12",
+    "@electric-sql/pglite-socket": "0.2.14"
+  }
+}

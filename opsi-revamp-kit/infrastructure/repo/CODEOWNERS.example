@@ -1,0 +1,29 @@
+# Copy to .github/CODEOWNERS in opsi-enterprise-revamp. Replace the handles with real teams (same names as
+# docs/commit-plan.md). Last matching pattern wins. Combine with branch protection "Require review from Code Owners".
+
+*                                          @backend-leads
+
+# Product code by area (docs/commit-plan.md)
+/apps/opsi-api/app/modules/identity/       @security-team @backend-leads
+/apps/opsi-api/app/modules/agents/         @ai-platform @backend-leads
+/apps/opsi-api/app/modules/search/         @ai-platform
+/apps/opsi-api/app/modules/chat/           @backend-leads
+/apps/opsi-web/                            @frontend-leads
+/apps/copilot-runtime/                     @ai-platform @frontend-leads
+/services/ingestion/                       @data-platform
+/database/migrations/                      @dba @backend-leads
+/infrastructure/                           @platform-ops @security-team
+/docs/adr/                                 @architects
+
+# Anything that changes which third-party code we carry or depend on gets an extra pair of eyes
+/third_party/                              @architects @open-source-review
+/THIRD_PARTY_NOTICES.md                    @open-source-review
+/patches/                                  @architects
+**/package.json                            @frontend-leads @architects
+**/package-lock.json                       @frontend-leads @architects
+/requirements/                             @backend-leads @architects
+
+# Repository policy itself
+/.github/                                  @architects @platform-ops
+/.gitattributes                            @architects
+/scripts/repo/                             @architects

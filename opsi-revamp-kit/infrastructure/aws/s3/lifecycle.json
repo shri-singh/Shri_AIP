@@ -1,0 +1,42 @@
+{
+  "Rules": [
+    {
+      "ID": "bronze-tiering-and-retention",
+      "Filter": {"Prefix": "raw/"},
+      "Status": "Enabled",
+      "Transitions": [
+        {"Days": 30, "StorageClass": "STANDARD_IA"},
+        {"Days": 90, "StorageClass": "GLACIER_IR"}
+      ],
+      "Expiration": {"Days": 400},
+      "NoncurrentVersionExpiration": {"NoncurrentDays": 30}
+    },
+    {
+      "ID": "quarantine-retention",
+      "Filter": {"Prefix": "quarantine/"},
+      "Status": "Enabled",
+      "Expiration": {"Days": 90},
+      "NoncurrentVersionExpiration": {"NoncurrentDays": 7}
+    },
+    {
+      "ID": "voice-temp-never-retained",
+      "Filter": {"Prefix": "voice-tmp/"},
+      "Status": "Enabled",
+      "Expiration": {"Days": 1},
+      "NoncurrentVersionExpiration": {"NoncurrentDays": 1}
+    },
+    {
+      "ID": "db-logical-exports",
+      "Filter": {"Prefix": "db-logical/"},
+      "Status": "Enabled",
+      "Expiration": {"Days": 35},
+      "NoncurrentVersionExpiration": {"NoncurrentDays": 7}
+    },
+    {
+      "ID": "abort-incomplete-multipart",
+      "Filter": {"Prefix": ""},
+      "Status": "Enabled",
+      "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 7}
+    }
+  ]
+}

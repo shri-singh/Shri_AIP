@@ -1,0 +1,40 @@
+{
+  "state": "SUCCEEDED",
+  "progress": 100,
+  "ttlSeconds": 60,
+  "result": {
+    "records": [
+      {
+        "timestamp": "2024-10-24T10:01:00.123456789Z",
+        "content": "ERROR order 12345 failed: upstream timeout after 3000 ms (user jane.doe@example.com)",
+        "loglevel": "ERROR",
+        "status": "ERROR",
+        "dt.entity.service": "SERVICE-00000000000000A1",
+        "host.name": "synthetic-host-1",
+        "log.source": "/var/log/checkout/app.log",
+        "trace_id": "0af7651916cd43dd8448eb211c80319c"
+      },
+      {
+        "timestamp": "2024-10-24T10:02:30.000000001Z",
+        "content": "WARN retrying call to payments, Authorization: Bearer abcdefghijklmnopqrstuvwxyz012345",
+        "loglevel": "WARN",
+        "status": "WARN",
+        "dt.entity.service": "SERVICE-00000000000000A1",
+        "host.name": "synthetic-host-1",
+        "log.source": "/var/log/checkout/app.log"
+      }
+    ],
+    "types": [
+      {"indexRange": [0, 1], "mappings": {"timestamp": {"type": "timestamp"}, "content": {"type": "string"}}}
+    ],
+    "metadata": {
+      "grail": {
+        "canonicalQuery": "fetch logs | filter ...",
+        "scannedRecords": 1200,
+        "scannedBytes": 1048576,
+        "sampled": false,
+        "notifications": []
+      }
+    }
+  }
+}

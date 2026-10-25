@@ -1,0 +1,14 @@
+# Copy to .gitattributes in opsi-enterprise-revamp.
+# linguist-vendored: excluded from GitHub language stats and from code search by default.
+# linguist-generated: collapsed in pull-request diffs, so reviewers focus on code we own.
+third_party/**                 linguist-vendored
+THIRD_PARTY_NOTICES.md         linguist-generated
+**/package-lock.json           linguist-generated
+src/generated/**               linguist-generated
+
+# Consistent line endings across Windows laptops and Linux EC2
+*                              text=auto eol=lf
+*.sh                           text eol=lf
+*.ps1                          text eol=crlf
+*.png                          binary
+*.jpg                          binary
